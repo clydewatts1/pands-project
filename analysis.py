@@ -135,14 +135,21 @@ def generate_histogram(config,to_console = False):
     if os.path.exists(config["target_histogram"]):
         # remove the file
         os.remove(config["target_histogram"])
-    # create a histogram of the data
-    plt.figure(figsize=(10, 6))
-    sns.histplot(data=config['df'], kde=True)
-    plt.title("Histogram of Data")
-    plt.savefig(config["target_histogram"])
+    # create a subplot with 2 rows and 2 columns to hold the historgrams
+    fig,ax = plt.subplots(2, 2, figsize=(10, 8))
+    fig.suptitle('Iris Dataset Histograms', fontsize=16)
+    df = config['df']
+    sns.histplot(df, x='sepal_length', hue='species', ax=ax[0, 0], alpha=0.2, bins=20, kde=True)
+    sns.histplot(df, x='sepal_width', hue='species', ax=ax[0, 1], alpha=0.2, bins=20, kde=True)
+    sns.histplot(df, x='petal_length', hue='species', ax=ax[1, 0], alpha=0.2, bins=20, kde=True)
+    sns.histplot(df, x='petal_width', hue='species',  ax=ax[1, 1], alpha=0.2, bins=20, kde=True)
+
+    plt.tight_layout()
     if to_console:
         # print the histogram to the console
         plt.show()
+    # save the histogram to a file
+    plt.savefig(config["target_histogram"])
     plt.close()
     return 0
 
