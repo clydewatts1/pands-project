@@ -14,6 +14,8 @@ ATU Data Analytics Post Grad Diploma - Project
 | .             | iris.names            | Iris Names                             | Iris Data - Names             |
 | .             | bezdekItis.data       | Iris Data - CSV                        | CSV - no bom , linux          |
 | .             | README.md             | This file                              |                               |
+| .             | analysis_report.txt   | Analysis Report                        |                               | 
+| .             | analysis.log          | Script Log file                        |                               |   
 
 ### File : iris.data file format
 
