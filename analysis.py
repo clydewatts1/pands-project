@@ -23,6 +23,7 @@ config = {
     "target_report": "analysis_report.txt",
     "target_histogram": "analysis_histograms.png",
     "target_scatter": "analysis_scatter.png",
+    "target_box": "analysis_box.png"
 }
 
 def setup_logging(log_file = log_file,level = logging.INFO):
@@ -103,9 +104,49 @@ def convert_to_metrics_df(config):
     # value_name is the new column name for the values
     df_iris_melt = config['df'].melt(id_vars='species', var_name='feature', value_name='value')
     config["df_iris_melt"] = df_iris_melt
-    logging.info("DataFrame shape: %s", df_iris_melt.shape)
-    logging.info("DataFrame columns: %s", df_iris_melt.columns)
-    logging.info("DataFrame head: %s", df_iris_melt.head())
+    logging.info("Melt DataFrame shape: %s", config["df_iris_melt"].shape)
+    logging.info("Melt DataFrame columns: %s", config["df_iris_melt"].columns)
+    logging.info("Melt DataFrame head: %s", config["df_iris_melt"].head())
+    # check if the dataframe is empty
+    if df_iris_melt.empty:
+        logging.error("DataFrame is empty")
+        return 1
+    return 0
+
+def load_summary(config):
+    def quantile_25(x):
+        return np.quantile(x, 0.25)
+
+    def quantile_75(x):
+        return np.quantile(x, 0.75)
+    
+    # Get dataframe from config
+    if 'df' not in config:
+        logging.error("DataFrame not in config")
+        return -1
+    # Get the dataframe from the config
+
+    df = config['df_iris_melt'].groupby(['species', 'feature'])['value'].agg(['mean', 'min', 'max', 'std', 'median',quantile_25 , quantile_75]).reset_index()
+    # Group by target and get the mean, min, max, std, median, 25th and 75th quantile
+
+    df = df.rename(columns={'mean': 'Mean', 'min': 'Min', 'max': 'Max', 'std': 'Std', 'median': 'Median', 'quantile_25': 'Q25', 'quantile_75': 'Q75'})
+    # Create a new column with the feature name
+    # round the values to 2 decimal places
+    df['Mean'] = df['Mean'].round(2)
+    df['Min'] = df['Min'].round(2)
+    df['Max'] = df['Max'].round(2)
+    df['Std'] = df['Std'].round(2)
+    df['Median'] = df['Median'].round(2)
+    df['Q25'] = df['Q25'].round(2)
+    df['Q75'] = df['Q75'].round(2)
+    # check if the dataframe is empty
+    if df.empty:
+        logging.error("DataFrame is empty")
+        return 1
+    config['df_summary'] = df
+    logging.info("Summary DataFrame shape: %s", config["df_summary"].shape)
+    logging.info("Summary DataFrame columns: %s", config["df_summary"].columns)
+    logging.info("Summary DataFrame head: %s", config["df_summary"].head())
     return 0
 
 def generate_report(config,to_console = False):
@@ -202,9 +243,41 @@ def generate_scatter_plot(config,to_console = False):
     return 0
     
 
-def generate_box_plot(config):
+def generate_box_plot(config,to_console = False):
     # Generate a box plot of the data
-    pass
+    # check if the dataframe is empty
+    if 'df' not in config:
+        logging.error("DataFrame not in config")
+        return -1
+    # check if the box plot file exists
+    if os.path.exists(config["target_box"]):
+        # remove the file
+        os.remove(config["target_box"])
+    # create a subplot with 2 rows and 2 columns to hold the historgrams
+    fig,ax = plt.subplots(2, 2, figsize=(10, 8))
+    fig.suptitle('Iris Dataset Box Plot', fontsize=16)
+    df = config['df']
+    # Like grid lines easier to see
+    ax[0,0].grid(True)
+    ax[0,1].grid(True)
+    ax[1,0].grid(True)
+    ax[1,1].grid(True)
+    # xlabels stackoverflow
+    # TODO : get the x-axis to be the same for all plots
+    
+    # https://stackoverflow.com/questions/19509870/how-to-set-x-axis-labels-in-seaborn-boxplot
+    sns.boxplot(data=config['df'], x='species', y='sepal_length', ax=ax[0, 0],hue='species', palette="pastel").set(xlabel="Species", ylabel="Sepal Length")
+    sns.boxplot(data=config['df'], x='species', y='sepal_width', ax=ax[0, 1], hue='species', palette="pastel").set(xlabel="Species", ylabel="Sepal Width")
+    sns.boxplot(data=config['df'], x='species', y='petal_length', ax=ax[1, 0], hue='species', palette="pastel").set(xlabel="Species", ylabel="Petal Length")
+    sns.boxplot(data=config['df'], x='species', y='petal_width', ax=ax[1, 1], hue='species', palette="pastel").set(xlabel="Species", ylabel="Petal Width")
+    plt.tight_layout()
+    if to_console:
+        # print the box plot to the console
+        plt.show()
+    # save the box plot to a file
+    plt.savefig(config["target_box"])
+    plt.close()
+    return 0
 
 
 def main():
@@ -223,6 +296,13 @@ def main():
     # If there is a error converting the data, log it and return
     if return_code == 1:
         logging.error("Failed to convert data to metrics dataframe")
+        return
+    
+    # Generate summary statistics
+    return_code = load_summary(config)
+    # If there is a error generating the summary statistics, log it and return
+    if return_code == 1:
+        logging.error("Failed to generate summary statistics")
         return
 
     
@@ -247,6 +327,12 @@ def main():
         logging.error("Failed to generate scatter plot")
         return
     
+    # Generate the box plot
+    return_code = generate_box_plot(config)
+    # If there is a error generating the box plot, log it and return
+    if return_code == -1:
+        logging.error("Failed to generate box plot")
+        return
 
 if __name__ == "__main__":
     main()

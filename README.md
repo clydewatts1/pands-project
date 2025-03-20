@@ -36,3 +36,4 @@ The iris dataset is a tiny dataset which is used for projects , such as this one
 - https://www.geeksforgeeks.org/multi-plot-grid-in-seaborn/   : Used to create the multi-plot grid
 - https://www.cuemath.com/geometry/area-of-an-ellipse/
 - datacamp.com : The data analytics course I am currently taking
+- https://www.statology.org/seaborn-table/ : Used to create the table to the side of a table
