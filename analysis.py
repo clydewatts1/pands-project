@@ -90,6 +90,23 @@ def load_data(config):
     # check if the dataframe is empty
     return return_code , df
 
+def convert_to_metrics_df(config):
+    # This will convert to a metric dataframe
+    # using melt , this is useful for certain types of plots
+    # in the datacamp course - I am familiar with the metrics tables
+    # from Lloyds Bank and implememnted in primark for SKU/Store/Date
+    # use melt to convert the dataframe to long format
+    # this is a classic metric table format
+    # makes it easier to workout the mean, min, max, std, and median of the species and features
+    # id_vars is the column to keep as is - target setosa, versicolor, virginica
+    # var_name is the new column name for the features
+    # value_name is the new column name for the values
+    df_iris_melt = config['df'].melt(id_vars='species', var_name='feature', value_name='value')
+    config["df_iris_melt"] = df_iris_melt
+    logging.info("DataFrame shape: %s", df_iris_melt.shape)
+    logging.info("DataFrame columns: %s", df_iris_melt.columns)
+    logging.info("DataFrame head: %s", df_iris_melt.head())
+    return 0
 
 def generate_report(config,to_console = False):
     # setup a report file name
@@ -139,6 +156,7 @@ def generate_histogram(config,to_console = False):
     fig,ax = plt.subplots(2, 2, figsize=(10, 8))
     fig.suptitle('Iris Dataset Histograms', fontsize=16)
     df = config['df']
+    sns.set_palette("pastel")
     sns.histplot(df, x='sepal_length', hue='species', ax=ax[0, 0], alpha=0.2, bins=20, kde=True)
     sns.histplot(df, x='sepal_width', hue='species', ax=ax[0, 1], alpha=0.2, bins=20, kde=True)
     sns.histplot(df, x='petal_length', hue='species', ax=ax[1, 0], alpha=0.2, bins=20, kde=True)
@@ -163,16 +181,27 @@ def generate_scatter_plot(config,to_console = False):
     if os.path.exists(config["target_scatter"]):
         # remove the file
         os.remove(config["target_scatter"])
-    # create a scatter plot of the data
-    plt.figure(figsize=(10, 6))
-    sns.scatterplot(data=config['df'], x='sepal_length', y='sepal_width', hue='species')
-    plt.title("Scatter Plot of Data")
-    plt.savefig(config["target_scatter"])
+    sns.set_palette("pastel")
+    # create a subplot with 2 rows and 2 columns to hold the historgrams
+    fig,ax = plt.subplots(2, 2, figsize=(10, 8))
+    fig.suptitle('Iris Dataset Scatter Plot', fontsize=16)
+    df = config['df']
+    # First row is sepal length and width and petal length and width
+    # Second row is sepal length and petal length and sepal width and petal width
+    sns.scatterplot(data=config['df'], x='sepal_length', y='sepal_width', hue='species', ax=ax[0, 0])
+    sns.scatterplot(data=config['df'], x='petal_length', y='petal_width', hue='species', ax=ax[0, 1])
+    sns.scatterplot(data=config['df'], x='sepal_length', y='petal_length', hue='species', ax=ax[1, 0])
+    sns.scatterplot(data=config['df'], x='sepal_width', y='petal_width', hue='species', ax=ax[1, 1])
+    plt.tight_layout()
     if to_console:
         # print the scatter plot to the console
         plt.show()
+    # save the scatter plot to a file
+    plt.savefig(config["target_scatter"])
     plt.close()
     return 0
+    
+
 def generate_box_plot(config):
     # Generate a box plot of the data
     pass
@@ -188,6 +217,14 @@ def main():
     if return_code == 1:
         logging.error("Failed to load data from %s", file_path)
         return
+    
+    # COnvert data to metrics dataframe
+    return_code = convert_to_metrics_df(config)
+    # If there is a error converting the data, log it and return
+    if return_code == 1:
+        logging.error("Failed to convert data to metrics dataframe")
+        return
+
     
     # Generate the report
     return_code = generate_report(config)
@@ -209,6 +246,7 @@ def main():
     if return_code == -1:
         logging.error("Failed to generate scatter plot")
         return
+    
 
 if __name__ == "__main__":
     main()

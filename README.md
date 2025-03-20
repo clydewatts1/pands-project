@@ -34,3 +34,5 @@ The iris dataset is a tiny dataset which is used for projects , such as this one
 - Iris Dataset: https://archive.ics.uci.edu/dataset/53/iris
 - Iris Dataset: Fisher, R. (1936). Iris [Dataset]. UCI Machine Learning Repository. https://doi.org/10.24432/C56C76.
 - https://www.geeksforgeeks.org/multi-plot-grid-in-seaborn/   : Used to create the multi-plot grid
+- https://www.cuemath.com/geometry/area-of-an-ellipse/
+- datacamp.com : The data analytics course I am currently taking
