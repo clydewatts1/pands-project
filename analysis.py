@@ -23,9 +23,10 @@ config = {
     "target_report": "analysis_report.txt",
     "target_histogram": "analysis_histograms.png",
     "target_scatter": "analysis_scatter.png",
-    "target_box": "analysis_box.png"
+    "target_box": "analysis_box.png",
+    "target2_box": "analysis_box_II.png"
 }
-
+    
 def setup_logging(log_file = log_file,level = logging.INFO):
     # Set up logging configuration
     # set logging directory to this script's directory
@@ -264,7 +265,7 @@ def generate_box_plot(config,to_console = False):
     ax[1,1].grid(True)
     # xlabels stackoverflow
     # TODO : get the x-axis to be the same for all plots
-    
+
     # https://stackoverflow.com/questions/19509870/how-to-set-x-axis-labels-in-seaborn-boxplot
     sns.boxplot(data=config['df'], x='species', y='sepal_length', ax=ax[0, 0],hue='species', palette="pastel").set(xlabel="Species", ylabel="Sepal Length")
     sns.boxplot(data=config['df'], x='species', y='sepal_width', ax=ax[0, 1], hue='species', palette="pastel").set(xlabel="Species", ylabel="Sepal Width")
@@ -279,6 +280,47 @@ def generate_box_plot(config,to_console = False):
     plt.close()
     return 0
 
+def generate_box_plot_II(config,to_console = False):
+    # Generate a box plot of the data
+    # check if the dataframe is empty
+    if 'df' not in config:
+        logging.error("DataFrame not in config")
+        return -1
+    # check if the box plot file exists
+    if os.path.exists(config["target2_box"]):
+        # remove the file
+        os.remove(config["target2_box"])
+    df_iris_melt = config['df_iris_melt'] 
+    # Plotting the boxplot using seaborn - datacamp seaborn tutoria
+    sns.set_context("notebook")
+    # Set the style of seaborn
+    sns.set_style("darkgrid")
+    g = sns.catplot(data=df_iris_melt,kind="box",x="species",y="value",hue='species',col="feature",col_wrap=2,sharex=True)
+    # how to set the title for each subplot - github copilot assited with adjustment
+    # Adjust the top space for the title and increase spacing between subplots
+    plt.subplots_adjust(top=0.9, wspace=0.3, hspace=0.4)
+    # set grid on each subplot
+    for ax in g.axes.flat:
+        ax.grid(True)
+        # get the title of each subplot
+        # This could be done in one line, but for clarity multiple lines are used
+        title = ax.get_title()  # this gets the title of each subplot
+        # remove the prefix "feature = " from the title
+        # and replace "_" with " "
+        title = title.replace("feature = ", "").replace("_"," ")
+        # now capitalize the first letter of each word
+        title = title.title()
+        print(title)
+        # set the title of each subplot 
+        ax.set_title(title)
+    plt.suptitle("Boxplot of features by species")
+    if to_console:
+        # print the box plot to the console
+        plt.show()  
+    # save the box plot to a file
+    plt.savefig(config["target2_box"])
+    plt.close()
+    return 0
 
 def main():
     # Set up logging
@@ -332,6 +374,13 @@ def main():
     # If there is a error generating the box plot, log it and return
     if return_code == -1:
         logging.error("Failed to generate box plot")
+        return
+    
+    # Generate the box plot II
+    return_code = generate_box_plot_II(config)
+    # If there is a error generating the box plot, log it and return
+    if return_code == -1:
+        logging.error("Failed to generate box plot II")
         return
 
 if __name__ == "__main__":
