@@ -21,12 +21,17 @@ config = {
     "source_csv_file": "iris.data",
     "source_columns": ["sepal_length", "sepal_width", "petal_length", "petal_width", "species"],
     "target_report": "analysis_report.txt",
-    "target_histogram": "analysis_histograms.png",
-    "target_scatter": "analysis_scatter.png",
-    "target_box": "analysis_box.png",
-    "target2_box": "analysis_box_II.png"
+    "target_histogram": "analysis_plot_histograms.png",
+    "target_scatter": "analysis_plot_scatter.png",
+    "target_box": "analysis_plot_box.png",
+    "target2_box": "analysis_plot_box_II.png",
+    "target2_violin": "analysis_plot_violin_II.png",
+    "target2_boxen": "analysis_plot_boxen_II.png"
 }
-    
+#------------------------------------------------------------------------------
+# Function: setup_logging
+# Description: Set up logging for the script
+#------------------------------------------------------------------------------   
 def setup_logging(log_file = log_file,level = logging.INFO):
     # Set up logging configuration
     # set logging directory to this script's directory
@@ -50,7 +55,10 @@ def setup_logging(log_file = log_file,level = logging.INFO):
     # Add the console handler to the root logger
     logging.getLogger().addHandler(console_handler)
 
-
+#------------------------------------------------------------------------------
+# Function: load_data
+# Description: Load data from a CSV file into a pandas DataFrame
+#------------------------------------------------------------------------------
 def load_data(config):
     # Load data from a CSV file into a pandas DataFrame
 
@@ -91,6 +99,10 @@ def load_data(config):
     config["df"] = df
     # check if the dataframe is empty
     return return_code , df
+#------------------------------------------------------------------------------
+# Function: convert_to_metrics_df
+# Description: Convert the DataFrame to a metrics DataFrame
+#------------------------------------------------------------------------------
 
 def convert_to_metrics_df(config):
     # This will convert to a metric dataframe
@@ -113,7 +125,10 @@ def convert_to_metrics_df(config):
         logging.error("DataFrame is empty")
         return 1
     return 0
-
+#------------------------------------------------------------------------------
+# Function: load_summary
+# Description: Load summary statistics for the DataFrame
+#------------------------------------------------------------------------------
 def load_summary(config):
     def quantile_25(x):
         return np.quantile(x, 0.25)
@@ -149,7 +164,10 @@ def load_summary(config):
     logging.info("Summary DataFrame columns: %s", config["df_summary"].columns)
     logging.info("Summary DataFrame head: %s", config["df_summary"].head())
     return 0
-
+#------------------------------------------------------------------------------
+# Function: generate_report
+# Description: Generate a report of the analysis
+#------------------------------------------------------------------------------
 def generate_report(config,to_console = False):
     # setup a report file name
     report_file = config["target_report"]
@@ -183,7 +201,10 @@ def generate_report(config,to_console = False):
         with open(report_file, "r") as f:
             print(f.read())
     return 0
-
+#------------------------------------------------------------------------------
+# Function: generate_histogram
+# Description: Generate a histogram of the data
+#------------------------------------------------------------------------------
 def generate_histogram(config,to_console = False):
     # Generate a histogram of the data
     # check if the dataframe is empty
@@ -212,7 +233,10 @@ def generate_histogram(config,to_console = False):
     plt.savefig(config["target_histogram"])
     plt.close()
     return 0
-
+#------------------------------------------------------------------------------
+# Function: generate_scatter_plot
+# Description: Generate a scatter plot of the data
+#------------------------------------------------------------------------------
 def generate_scatter_plot(config,to_console = False):
     # Generate a scatter plot of the data
     # check if the dataframe is empty
@@ -243,7 +267,10 @@ def generate_scatter_plot(config,to_console = False):
     plt.close()
     return 0
     
-
+#------------------------------------------------------------------------------
+# Function: generate_box_plot
+# Description: Generate a box plot of the data
+#------------------------------------------------------------------------------
 def generate_box_plot(config,to_console = False):
     # Generate a box plot of the data
     # check if the dataframe is empty
@@ -280,6 +307,11 @@ def generate_box_plot(config,to_console = False):
     plt.close()
     return 0
 
+#------------------------------------------------------------------------------
+# Function: generate_box_plot_II
+# Description: Generate a box plot of the data using seaborn
+#------------------------------------------------------------------------------
+
 def generate_box_plot_II(config,to_console = False):
     # Generate a box plot of the data
     # check if the dataframe is empty
@@ -295,7 +327,7 @@ def generate_box_plot_II(config,to_console = False):
     sns.set_context("notebook")
     # Set the style of seaborn
     sns.set_style("darkgrid")
-    g = sns.catplot(data=df_iris_melt,kind="box",x="species",y="value",hue='species',col="feature",col_wrap=2,sharex=True)
+    g = sns.catplot(data=df_iris_melt,kind="violin",x="species",y="value",hue='species',col="feature",col_wrap=2,sharex=True)
     # how to set the title for each subplot - github copilot assited with adjustment
     # Adjust the top space for the title and increase spacing between subplots
     plt.subplots_adjust(top=0.9, wspace=0.3, hspace=0.4)
@@ -321,13 +353,17 @@ def generate_box_plot_II(config,to_console = False):
     plt.savefig(config["target2_box"])
     plt.close()
     return 0
-
+#------------------------------------------------------------------------------
+# Function: main
+# Description: Main function to run the analysis
+#------------------------------------------------------------------------------
 def main():
     # Set up logging
     setup_logging()
     # TODO: Add yaml config file
 
     return_code, df = load_data(config)
+    file_path = config["source_csv_file"]
     # If there is a error loading the data, log it and return
     if return_code == 1:
         logging.error("Failed to load data from %s", file_path)
