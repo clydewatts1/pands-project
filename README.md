@@ -37,3 +37,8 @@ The iris dataset is a tiny dataset which is used for projects , such as this one
 - https://www.cuemath.com/geometry/area-of-an-ellipse/
 - datacamp.com : The data analytics course I am currently taking
 - https://www.statology.org/seaborn-table/ : Used to create the table to the side of a table
+- https://seaborn.pydata.org/generated/seaborn.catplot.html : Used to create the catplot - boxplot,violinplot,boxenplot
+- https://seaborn.pydata.org/generated/seaborn.violinplot.html#seaborn.violinplot : Used to create the violinplot
+- https://seaborn.pydata.org/generated/seaborn.boxenplot.html#seaborn.boxenplot : Used to create the boxenplot
+- Google Gemini : What is a violin plot?
+- Google Gemini : What is a boxen plot?

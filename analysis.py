@@ -33,6 +33,17 @@ config = {
 # Description: Set up logging for the script
 #------------------------------------------------------------------------------   
 def setup_logging(log_file = log_file,level = logging.INFO):
+    """
+    Set up logging configuration.
+    This function sets up logging to a specified log file and also configures
+    logging to the console. It ensures that the log file is located in the 
+    same directory as the script and clears the log file if it already exists.
+    Parameters:
+    log_file (str): The name of the log file to write logs to.
+    level (int): The logging level (default is logging.INFO).
+    Returns:
+    None
+    """
     # Set up logging configuration
     # set logging directory to this script's directory
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -312,22 +323,35 @@ def generate_box_plot(config,to_console = False):
 # Description: Generate a box plot of the data using seaborn
 #------------------------------------------------------------------------------
 
-def generate_box_plot_II(config,to_console = False):
+def generate_box_plot_II(config, to_console = False, kind = "box"):
     # Generate a box plot of the data
+    # check if the dataframe is empty
+    file_lookup = {
+        "box": config["target2_box"],
+        "boxen": config["target2_boxen"],
+        "violin": config["target2_violin"]
+    }
     # check if the dataframe is empty
     if 'df' not in config:
         logging.error("DataFrame not in config")
         return -1
+    # check if kind is valid
+    if kind not in file_lookup:
+        logging.error("Invalid kind: %s", kind)
+        return -1
+    png_file = file_lookup[kind]
+
+    
     # check if the box plot file exists
-    if os.path.exists(config["target2_box"]):
+    if os.path.exists(png_file):
         # remove the file
-        os.remove(config["target2_box"])
+        os.remove(png_file)
     df_iris_melt = config['df_iris_melt'] 
     # Plotting the boxplot using seaborn - datacamp seaborn tutoria
     sns.set_context("notebook")
     # Set the style of seaborn
     sns.set_style("darkgrid")
-    g = sns.catplot(data=df_iris_melt,kind="violin",x="species",y="value",hue='species',col="feature",col_wrap=2,sharex=True)
+    g = sns.catplot(data=df_iris_melt,kind=kind,x="species",y="value",hue='species',col="feature",col_wrap=2,sharex=True)
     # how to set the title for each subplot - github copilot assited with adjustment
     # Adjust the top space for the title and increase spacing between subplots
     plt.subplots_adjust(top=0.9, wspace=0.3, hspace=0.4)
@@ -345,12 +369,12 @@ def generate_box_plot_II(config,to_console = False):
         print(title)
         # set the title of each subplot 
         ax.set_title(title)
-    plt.suptitle("Boxplot of features by species")
+    plt.suptitle(f"{kind.capitalize()} Plot of features by species")
     if to_console:
         # print the box plot to the console
         plt.show()  
     # save the box plot to a file
-    plt.savefig(config["target2_box"])
+    plt.savefig(png_file)
     plt.close()
     return 0
 #------------------------------------------------------------------------------
@@ -419,5 +443,19 @@ def main():
         logging.error("Failed to generate box plot II")
         return
 
+    # Generate the boxen plot
+    return_code = generate_box_plot_II(config, kind = "boxen")
+    # If there is a error generating the box plot, log it and return
+    if return_code == -1:
+        logging.error("Failed to generate boxen plot")
+        return
+    
+    # Generate the violin plot
+    return_code = generate_box_plot_II(config, kind = "violin")
+    # If there is a error generating the box plot, log it and return
+    if return_code == -1:
+        logging.error("Failed to generate violin plot")
+        return
+    
 if __name__ == "__main__":
     main()
