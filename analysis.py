@@ -71,6 +71,19 @@ def setup_logging(log_file = log_file,level = logging.INFO):
 # Description: Load data from a CSV file into a pandas DataFrame
 #------------------------------------------------------------------------------
 def load_data(config):
+    """
+    Load data from a CSV file into a pandas DataFrame.
+    Args:
+        config (dict): Configuration dictionary containing the following keys:
+            - source_csv_file (str): Path to the source CSV file.
+            - source_columns (list): List of column names for the DataFrame.
+    Returns:
+        tuple: A tuple containing:
+            - return_code (int): 0 if successful, 1 if failure.
+            - df (pandas.DataFrame or None): Loaded DataFrame if successful, None if failure.
+    Raises:
+        Exception: If there is an error parsing the file.
+    """
     # Load data from a CSV file into a pandas DataFrame
 
     # return_code: 0 = success, 1 = failure
@@ -116,6 +129,25 @@ def load_data(config):
 #------------------------------------------------------------------------------
 
 def convert_to_metrics_df(config):
+    """
+    Converts a DataFrame to a metric DataFrame using the melt function.
+
+    This function transforms the input DataFrame into a long format, which is useful for certain types of plots
+    and statistical analysis. The resulting DataFrame will have columns for species, feature, and value.
+
+    Args:
+        config (dict): A configuration dictionary containing the input DataFrame under the key 'df'.
+
+    Returns:
+        int: Returns 0 if the conversion is successful, or 1 if the resulting DataFrame is empty.
+
+    Raises:
+        KeyError: If the 'df' key is not present in the config dictionary.
+
+    Example:
+        config = {'df': iris_df}
+        result = convert_to_metrics_df(config)
+    """
     # This will convert to a metric dataframe
     # using melt , this is useful for certain types of plots
     # in the datacamp course - I am familiar with the metrics tables
@@ -141,6 +173,28 @@ def convert_to_metrics_df(config):
 # Description: Load summary statistics for the DataFrame
 #------------------------------------------------------------------------------
 def load_summary(config):
+    """
+    Generates a summary DataFrame with statistical measures for each species and feature in the provided DataFrame.
+    Args:
+        config (dict): A configuration dictionary that must contain the key 'df_iris_melt', which is a DataFrame with columns 'species', 'feature', and 'value'.
+    Returns:
+        int: Returns 0 if the summary DataFrame is successfully created and added to the config dictionary under the key 'df_summary'.
+             Returns -1 if the 'df_iris_melt' DataFrame is not found in the config dictionary.
+             Returns 1 if the resulting summary DataFrame is empty.
+    The summary DataFrame includes the following statistical measures for each species and feature:
+        - Mean
+        - Min
+        - Max
+        - Std (Standard Deviation)
+        - Median
+        - Q25 (25th Quantile)
+        - Q75 (75th Quantile)
+    The resulting summary DataFrame is rounded to 2 decimal places for all statistical measures.
+    Logs:
+        - Logs an error if the 'df_iris_melt' DataFrame is not found in the config dictionary.
+        - Logs an error if the resulting summary DataFrame is empty.
+        - Logs the shape, columns, and head of the summary DataFrame upon successful creation.
+    """
     def quantile_25(x):
         return np.quantile(x, 0.25)
 
@@ -180,6 +234,21 @@ def load_summary(config):
 # Description: Generate a report of the analysis
 #------------------------------------------------------------------------------
 def generate_report(config,to_console = False):
+    """
+    Generates an analysis report from a given configuration and writes it to a file.
+
+    Parameters:
+    config (dict): A dictionary containing configuration settings. Must include:
+        - "target_report" (str): The file path where the report will be saved.
+        - "df" (pandas.DataFrame): The DataFrame to be analyzed and reported.
+    to_console (bool, optional): If True, prints the report to the console. Default is False.
+
+    Returns:
+    int: Returns 0 on success, -1 if the DataFrame is not found in the config.
+
+    Raises:
+    OSError: If there is an issue removing the existing report file.
+    """
     # setup a report file name
     report_file = config["target_report"]
     # check if the report file exists
@@ -217,6 +286,22 @@ def generate_report(config,to_console = False):
 # Description: Generate a histogram of the data
 #------------------------------------------------------------------------------
 def generate_histogram(config,to_console = False):
+    """
+    Generate a histogram of the Iris dataset.
+    Parameters:
+    config (dict): Configuration dictionary containing the following keys:
+        - 'df' (pandas.DataFrame): DataFrame containing the Iris dataset.
+        - 'target_histogram' (str): File path where the histogram will be saved.
+    to_console (bool, optional): If True, display the histogram in the console. Default is False.
+    Returns:
+    int: Returns 0 if the histogram is generated successfully, -1 if the DataFrame is not found in the config.
+    Raises:
+    FileNotFoundError: If the target histogram file path is invalid.
+    Notes:
+    - The function creates a subplot with 2 rows and 2 columns to hold the histograms of sepal length, sepal width, petal length, and petal width.
+    - The histograms are colored by species and include a kernel density estimate (KDE).
+    - If the target histogram file already exists, it will be removed before saving the new histogram.
+    """
     # Generate a histogram of the data
     # check if the dataframe is empty
     if 'df' not in config:
@@ -249,6 +334,24 @@ def generate_histogram(config,to_console = False):
 # Description: Generate a scatter plot of the data
 #------------------------------------------------------------------------------
 def generate_scatter_plot(config,to_console = False):
+    """
+    Generates a scatter plot of the Iris dataset based on the provided configuration.
+
+    Parameters:
+    config (dict): A dictionary containing the configuration for the plot. 
+                   It must include the following keys:
+                   - 'df': A pandas DataFrame containing the Iris dataset.
+                   - 'target_scatter': The file path where the scatter plot will be saved.
+    to_console (bool): If True, the scatter plot will be displayed in the console. 
+                       Default is False.
+
+    Returns:
+    int: Returns 0 if the scatter plot is generated successfully, 
+         -1 if the DataFrame is not found in the config.
+
+    Raises:
+    FileNotFoundError: If the target scatter plot file path is invalid.
+    """
     # Generate a scatter plot of the data
     # check if the dataframe is empty
     if 'df' not in config:
@@ -283,6 +386,18 @@ def generate_scatter_plot(config,to_console = False):
 # Description: Generate a box plot of the data
 #------------------------------------------------------------------------------
 def generate_box_plot(config,to_console = False):
+    """
+    Generates a box plot for the Iris dataset and saves it to a file.
+    Parameters:
+    config (dict): Configuration dictionary containing:
+        - 'df' (pandas.DataFrame): DataFrame containing the Iris dataset.
+        - 'target_box' (str): File path where the box plot image will be saved.
+    to_console (bool, optional): If True, displays the box plot in the console. Defaults to False.
+    Returns:
+    int: Returns 0 if the box plot is generated successfully, -1 if the DataFrame is not found in the config.
+    Raises:
+    FileNotFoundError: If the target box plot file path does not exist.
+    """
     # Generate a box plot of the data
     # check if the dataframe is empty
     if 'df' not in config:
@@ -324,6 +439,20 @@ def generate_box_plot(config,to_console = False):
 #------------------------------------------------------------------------------
 
 def generate_box_plot_II(config, to_console = False, kind = "box"):
+    """
+    Generate a box plot (or other specified kind of plot) of the data.
+    Parameters:
+    config (dict): Configuration dictionary containing the following keys:
+        - 'df': DataFrame to be plotted.
+        - 'df_iris_melt': Melted DataFrame for plotting.
+        - 'target2_box': File path for saving the box plot.
+        - 'target2_boxen': File path for saving the boxen plot.
+        - 'target2_violin': File path for saving the violin plot.
+    to_console (bool): If True, display the plot to the console. Default is False.
+    kind (str): Type of plot to generate. Options are 'box', 'boxen', or 'violin'. Default is 'box'.
+    Returns:
+    int: 0 if the plot is generated successfully, -1 if there is an error.
+    """
     # Generate a box plot of the data
     # check if the dataframe is empty
     file_lookup = {
