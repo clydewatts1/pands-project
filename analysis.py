@@ -84,6 +84,7 @@ def load_data(config):
     Raises:
         Exception: If there is an error parsing the file.
     """
+    logging.info("Loading data from %s", config["source_csv_file"])
     # Load data from a CSV file into a pandas DataFrame
 
     # return_code: 0 = success, 1 = failure
@@ -121,7 +122,8 @@ def load_data(config):
     logging.info("DataFrame head: %s", df.head())
     # add df to the config
     config["df"] = df
-    # check if the dataframe is empty
+
+    logging.info("DataFrame loaded successfully")
     return return_code , df
 #------------------------------------------------------------------------------
 # Function: convert_to_metrics_df
@@ -158,6 +160,7 @@ def convert_to_metrics_df(config):
     # id_vars is the column to keep as is - target setosa, versicolor, virginica
     # var_name is the new column name for the features
     # value_name is the new column name for the values
+    logging.info("Converting DataFrame to metrics DataFrame")
     df_iris_melt = config['df'].melt(id_vars='species', var_name='feature', value_name='value')
     config["df_iris_melt"] = df_iris_melt
     logging.info("Melt DataFrame shape: %s", config["df_iris_melt"].shape)
@@ -167,6 +170,7 @@ def convert_to_metrics_df(config):
     if df_iris_melt.empty:
         logging.error("DataFrame is empty")
         return 1
+    logging.info("DataFrame converted to metrics DataFrame")
     return 0
 #------------------------------------------------------------------------------
 # Function: load_summary
@@ -200,7 +204,7 @@ def load_summary(config):
 
     def quantile_75(x):
         return np.quantile(x, 0.75)
-    
+    logging.info("Generating summary DataFrame")
     # Get dataframe from config
     if 'df' not in config:
         logging.error("DataFrame not in config")
@@ -228,6 +232,7 @@ def load_summary(config):
     logging.info("Summary DataFrame shape: %s", config["df_summary"].shape)
     logging.info("Summary DataFrame columns: %s", config["df_summary"].columns)
     logging.info("Summary DataFrame head: %s", config["df_summary"].head())
+    logging.info("Summary DataFrame generated successfully")
     return 0
 #------------------------------------------------------------------------------
 # Function: generate_report
@@ -249,6 +254,7 @@ def generate_report(config,to_console = False):
     Raises:
     OSError: If there is an issue removing the existing report file.
     """
+    logging.info("Generating report")
     # setup a report file name
     report_file = config["target_report"]
     # check if the report file exists
@@ -280,6 +286,7 @@ def generate_report(config,to_console = False):
         # print the report to the console
         with open(report_file, "r") as f:
             print(f.read())
+    logging.info("Report generated successfully")
     return 0
 #------------------------------------------------------------------------------
 # Function: generate_histogram
@@ -302,6 +309,7 @@ def generate_histogram(config,to_console = False):
     - The histograms are colored by species and include a kernel density estimate (KDE).
     - If the target histogram file already exists, it will be removed before saving the new histogram.
     """
+    logging.info("Generating histogram")
     # Generate a histogram of the data
     # check if the dataframe is empty
     if 'df' not in config:
@@ -328,6 +336,7 @@ def generate_histogram(config,to_console = False):
     # save the histogram to a file
     plt.savefig(config["target_histogram"])
     plt.close()
+    logging.info("Histogram generated successfully")
     return 0
 #------------------------------------------------------------------------------
 # Function: generate_scatter_plot
@@ -352,6 +361,7 @@ def generate_scatter_plot(config,to_console = False):
     Raises:
     FileNotFoundError: If the target scatter plot file path is invalid.
     """
+    logging.info("Generating scatter plot")
     # Generate a scatter plot of the data
     # check if the dataframe is empty
     if 'df' not in config:
@@ -379,6 +389,7 @@ def generate_scatter_plot(config,to_console = False):
     # save the scatter plot to a file
     plt.savefig(config["target_scatter"])
     plt.close()
+    logging.info("Scatter plot generated successfully")
     return 0
     
 #------------------------------------------------------------------------------
@@ -399,6 +410,7 @@ def generate_box_plot(config,to_console = False):
     FileNotFoundError: If the target box plot file path does not exist.
     """
     # Generate a box plot of the data
+    logging.info("Generating box plot")
     # check if the dataframe is empty
     if 'df' not in config:
         logging.error("DataFrame not in config")
@@ -431,6 +443,7 @@ def generate_box_plot(config,to_console = False):
     # save the box plot to a file
     plt.savefig(config["target_box"])
     plt.close()
+    logging.info("Box plot generated successfully")
     return 0
 
 #------------------------------------------------------------------------------
@@ -460,6 +473,7 @@ def generate_box_plot_II(config, to_console = False, kind = "box"):
         "boxen": config["target2_boxen"],
         "violin": config["target2_violin"]
     }
+    logging.info("Generating box plot II")
     # check if the dataframe is empty
     if 'df' not in config:
         logging.error("DataFrame not in config")
@@ -505,6 +519,7 @@ def generate_box_plot_II(config, to_console = False, kind = "box"):
     # save the box plot to a file
     plt.savefig(png_file)
     plt.close()
+    logging.info("Box plot II generated successfully")
     return 0
 #------------------------------------------------------------------------------
 # Function: main
@@ -513,6 +528,7 @@ def generate_box_plot_II(config, to_console = False, kind = "box"):
 def main():
     # Set up logging
     setup_logging()
+    logging.info("Starting analysis")
     # TODO: Add yaml config file
 
     return_code, df = load_data(config)
@@ -585,6 +601,7 @@ def main():
     if return_code == -1:
         logging.error("Failed to generate violin plot")
         return
+    logging.info("Analysis completed successfully")
     
 if __name__ == "__main__":
     main()
