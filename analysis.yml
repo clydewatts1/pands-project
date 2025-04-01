@@ -1,0 +1,16 @@
+source_columns:
+- sepal_length
+- sepal_width
+- petal_length
+- petal_width
+- species
+source_csv_file: iris.data
+source_path: c:\Users\cw171001\OneDrive - Teradata\Documents\Data_Analytics_2025_ATU\pands\pands-project
+target2_box: analysis_plot_box_II.png
+target2_boxen: analysis_plot_boxen_II.png
+target2_violin: analysis_plot_violin_II.png
+target_box: analysis_plot_box.png
+target_histogram: analysis_plot_histograms.png
+target_path: c:\Users\cw171001\OneDrive - Teradata\Documents\Data_Analytics_2025_ATU\pands\pands-project
+target_report: analysis_report.txt
+target_scatter: analysis_plot_scatter.png

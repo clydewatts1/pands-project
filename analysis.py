@@ -14,12 +14,17 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import logging
 import os
+import argparse
+import yaml
 
 log_file = "analysis.log"
 # configuration dictionary
 config = {
     "source_csv_file": "iris.data",
+    # get file name of this script , makes it easier to run from vscode or jupyter noteboo
+    "source_path": os.path.dirname(os.path.abspath(__file__)).replace("\\","/"),
     "source_columns": ["sepal_length", "sepal_width", "petal_length", "petal_width", "species"],
+    "target_path": os.path.dirname(os.path.abspath(__file__)).replace("\\","/"),
     "target_report": "analysis_report.txt",
     "target_histogram": "analysis_plot_histograms.png",
     "target_scatter": "analysis_plot_scatter.png",
@@ -28,6 +33,26 @@ config = {
     "target2_violin": "analysis_plot_violin_II.png",
     "target2_boxen": "analysis_plot_boxen_II.png"
 }
+#------------------------------------------------------------------------------
+# Function: write_config_to_file
+# Description: Write the configuration dictionary to a YAML file
+#------------------------------------------------------------------------------
+def write_config_to_file(config, file_path):
+    """
+    Write the configuration dictionary to a YAML file.
+    Args:
+        config (dict): Configuration dictionary to be written to the file.
+        file_path (str): Path to the YAML file where the configuration will be saved.
+    """
+    # get path from this config.yaml file
+    yml_path = os.path.dirname(os.path.abspath(file_path))
+    # check if the directory exists
+    if not os.path.exists(yml_path):
+        raise FileNotFoundError(f"Directory {yml_path} does not exist")
+    # not doing try except because this is a once off to capture config.yml file
+    with open(file_path, 'w') as file:
+        yaml.dump(config, file, default_flow_style=False)
+    logging.info("Configuration written to %s", file_path)
 #------------------------------------------------------------------------------
 # Function: setup_logging
 # Description: Set up logging for the script
@@ -84,7 +109,7 @@ def load_data(config):
     Raises:
         Exception: If there is an error parsing the file.
     """
-    logging.info("Loading data from %s", config["source_csv_file"])
+    logging.info("Loading data from dir %s file%s", config['source_path'],config["source_csv_file"])
     # Load data from a CSV file into a pandas DataFrame
 
     # return_code: 0 = success, 1 = failure
@@ -256,7 +281,7 @@ def generate_report(config,to_console = False):
     """
     logging.info("Generating report")
     # setup a report file name
-    report_file = config["target_report"]
+    report_file = f"{config['target_path']}/{config["target_report"]}"
     # check if the report file exists
     if os.path.exists(report_file):
         # remove the file
@@ -334,7 +359,9 @@ def generate_histogram(config,to_console = False):
         # print the histogram to the console
         plt.show()
     # save the histogram to a file
-    plt.savefig(config["target_histogram"])
+    filename = f"{config['target_path']}/{config['target_histogram']}"
+    logging.info("Saving histogram to ",filename)
+    plt.savefig(filename)
     plt.close()
     logging.info("Histogram generated successfully")
     return 0
@@ -364,13 +391,14 @@ def generate_scatter_plot(config,to_console = False):
     logging.info("Generating scatter plot")
     # Generate a scatter plot of the data
     # check if the dataframe is empty
+    filename = f"{config['target_path']}/{config['target_scatter']}"
     if 'df' not in config:
         logging.error("DataFrame not in config")
         return -1
     # check if the scatter plot file exists
-    if os.path.exists(config["target_scatter"]):
+    if os.path.exists(filename):
         # remove the file
-        os.remove(config["target_scatter"])
+        os.remove(filename)
     sns.set_palette("pastel")
     # create a subplot with 2 rows and 2 columns to hold the historgrams
     fig,ax = plt.subplots(2, 2, figsize=(10, 8))
@@ -387,6 +415,8 @@ def generate_scatter_plot(config,to_console = False):
         # print the scatter plot to the console
         plt.show()
     # save the scatter plot to a file
+
+    logging.info("Saving scatter plot to ",filename)
     plt.savefig(config["target_scatter"])
     plt.close()
     logging.info("Scatter plot generated successfully")
@@ -416,9 +446,10 @@ def generate_box_plot(config,to_console = False):
         logging.error("DataFrame not in config")
         return -1
     # check if the box plot file exists
-    if os.path.exists(config["target_box"]):
+    filename = f"{config['target_path']}/{config['target_box']}"
+    if os.path.exists(filename):
         # remove the file
-        os.remove(config["target_box"])
+        os.remove(filename)
     # create a subplot with 2 rows and 2 columns to hold the historgrams
     fig,ax = plt.subplots(2, 2, figsize=(10, 8))
     fig.suptitle('Iris Dataset Box Plot', fontsize=16)
@@ -441,7 +472,7 @@ def generate_box_plot(config,to_console = False):
         # print the box plot to the console
         plt.show()
     # save the box plot to a file
-    plt.savefig(config["target_box"])
+    plt.savefig(filename)
     plt.close()
     logging.info("Box plot generated successfully")
     return 0
@@ -482,9 +513,7 @@ def generate_box_plot_II(config, to_console = False, kind = "box"):
     if kind not in file_lookup:
         logging.error("Invalid kind: %s", kind)
         return -1
-    png_file = file_lookup[kind]
-
-    
+    png_file = f"{config['target_path']}/{file_lookup[kind]}"   
     # check if the box plot file exists
     if os.path.exists(png_file):
         # remove the file
@@ -509,7 +538,6 @@ def generate_box_plot_II(config, to_console = False, kind = "box"):
         title = title.replace("feature = ", "").replace("_"," ")
         # now capitalize the first letter of each word
         title = title.title()
-        print(title)
         # set the title of each subplot 
         ax.set_title(title)
     plt.suptitle(f"{kind.capitalize()} Plot of features by species")
@@ -526,11 +554,59 @@ def generate_box_plot_II(config, to_console = False, kind = "box"):
 # Description: Main function to run the analysis
 #------------------------------------------------------------------------------
 def main():
+
+    # Set up argument parser
+    parser = argparse.ArgumentParser(description="Iris Dataset Analysis")
+    # Add argument for configuration file
+    # TODO: Add yaml config fil
+    parser.add_argument("--config", type=str, help="Path to the configuration file", default="config.yaml")
+    # Add argument for logging level
+    parser.add_argument("--log_level", type=str, help="Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)", default="INFO")
+    # Add write config to file option once off so I can capture the config file
+    parser.add_argument("--write_config", type=str, help="Write the config to a file")
+
+    args = parser.parse_args()
+    # Set logging level based on command line argument
     # Set up logging
-    setup_logging()
+    if args.log_level:
+        log_level = args.log_level.upper()
+        if log_level not in ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
+            logging.error("Invalid log level: %s", log_level)
+            return
+        setup_logging(level=log_level)
+    else:
+        setup_logging()
     logging.info("Starting analysis")
     # TODO: Add yaml config file
+    if args.write_config:
+        # Write the config to a file
+        logging.info("Writing config to file",args.write_config)
+        write_config_to_file(config, args.write_config)
+        logging.info("Config written to file")
+        return
+    
+    # load the config file
+    if args.config:
+        # check if the config file exists
+        if not os.path.exists(args.config):
+            logging.error("Config file %s does not exist", args.config)
+            return
+        with open(args.config, 'r') as file:
+            config = yaml.safe_load(file)
+            logging.info("Config loaded from file")
 
+    # check if config source path exists
+    if not os.path.exists(config["source_path"]):
+        logging.error("Source path %s does not exist", config["source_path"])
+        raise FileNotFoundError(f"Source path {config['source_path']} does not exist")
+        return
+    # check if config target path exists
+    if not os.path.exists(config["target_path"]):
+        logging.error("Target path %s does not exist", config["target_path"])
+        raise FileNotFoundError(f"Target path {config['target_path']} does not exist")
+        return
+
+    logging.info("Loading data")
     return_code, df = load_data(config)
     file_path = config["source_csv_file"]
     # If there is a error loading the data, log it and return
@@ -538,14 +614,16 @@ def main():
         logging.error("Failed to load data from %s", file_path)
         return
     
+    logging.info("Converting data to metrics dataframe")
     # COnvert data to metrics dataframe
     return_code = convert_to_metrics_df(config)
     # If there is a error converting the data, log it and return
     if return_code == 1:
         logging.error("Failed to convert data to metrics dataframe")
-        return
-    
+        return   
+
     # Generate summary statistics
+    logging.info("Generating summary statistics")
     return_code = load_summary(config)
     # If there is a error generating the summary statistics, log it and return
     if return_code == 1:
@@ -554,6 +632,7 @@ def main():
 
     
     # Generate the report
+    logging.info("Generating report")
     return_code = generate_report(config)
     # If there is a error generating the report, log it and return
     if return_code == -1:
@@ -561,6 +640,7 @@ def main():
         return
     
     # Generate the histogram
+    logging.info("Generating histogram")
     return_code = generate_histogram(config)
     # If there is a error generating the histogram, log it and return
     if return_code == -1:
@@ -568,6 +648,7 @@ def main():
         return
 
     # Generate the scatter plot
+    logging.info("Generating scatter plot")
     return_code = generate_scatter_plot(config)
     # If there is a error generating the scatter plot, log it and return
     if return_code == -1:
@@ -575,6 +656,7 @@ def main():
         return
     
     # Generate the box plot
+    logging.info("Generating box plot")
     return_code = generate_box_plot(config)
     # If there is a error generating the box plot, log it and return
     if return_code == -1:
@@ -582,6 +664,7 @@ def main():
         return
     
     # Generate the box plot II
+    logging.info("Generating box plot II")
     return_code = generate_box_plot_II(config)
     # If there is a error generating the box plot, log it and return
     if return_code == -1:
@@ -589,6 +672,7 @@ def main():
         return
 
     # Generate the boxen plot
+    logging.info("Generating boxen plot")
     return_code = generate_box_plot_II(config, kind = "boxen")
     # If there is a error generating the box plot, log it and return
     if return_code == -1:
@@ -596,6 +680,7 @@ def main():
         return
     
     # Generate the violin plot
+    logging.info("Generating violin plot")
     return_code = generate_box_plot_II(config, kind = "violin")
     # If there is a error generating the box plot, log it and return
     if return_code == -1:
