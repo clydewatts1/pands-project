@@ -9,37 +9,77 @@ ATU Data Analytics Post Grad Diploma - Project
 ### Course : ATU Post Grad Diploma in Data Analytics
 ### Module : Principles of Data Analytics
 ### Instructor : Andrew Beatty
-### Description : This project is an analysis of the iris dataset. The iris dataset is a tiny dataset which is used for projects , this one included. The iris dataset consists of 4 features ( properties) and 1 target . The 4 features are the petal length and width , and the sepal length and width ( no idea what a sepal is). The target is the iris flower type , setosa, versicolor or virginica. There is a sample of 50 of each flower species ( target). The features are all measured in cm , and the target is a varchar string of the species.
+
+
+## Command Line Arguments
+The script takes the following command line arguments:
+
+```bash
+python analysis.py --config <config_file> --log_level <log_level> --write_config <write_config>
+
+```
+| Argument        | Description                                                                 |
+|-----------------|-----------------------------------------------------------------------------|
+| --config        | Path to the configuration file (YAML format)                               |
+| --log_level     | Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)                      |
+| --write_config  | Write the configuration to a file (YAML format)                            |
+|-----------------|-----------------------------------------------------------------------------|
+
+
+## Configuration File
+The configuration file is in YAML format and contains the following sections:
+
+'''yaml
+
+source_columns:
+- sepal_length
+- sepal_width
+- petal_length
+- petal_width
+- speciesV
+source_csv_file: iris.data
+source_path: c:\Users\cw171001\OneDrive - Teradata\Documents\Data_Analytics_2025_ATU\pands\pands-project
+target2_box: analysis_plot_box_II.png
+target2_boxen: analysis_plot_boxen_II.png
+target2_violin: analysis_plot_violin_II.png
+target_box: analysis_plot_box.png
+target_histogram: analysis_plot_histograms.png
+target_path: c:\Users\cw171001\OneDrive - Teradata\Documents\Data_Analytics_2025_ATU\pands\pands-project
+target_report: analysis_report.txt
+target_scatter: analysis_plot_scatter.png
+
+```
 
 
 ## Flowchart
 
 ```mermaid
+---
+config:
+  look: neo
+---
 flowchart TD
-    A[Start] --> B[Parse Arguments]
-    B --> C{Write Config?}
-    C -->|Yes| D[Write Config to File]
-    D --> E[Exit]
-    C -->|No| F{Load Config File?}
-    F -->|Yes| G[Load Config File]
-    F -->|No| H[Use Default Config]
-    G --> I{Source Path Exists?}
-    H --> I
-    I -->|No| J[Log Error: Source Path Missing]
-    J --> K[Exit]
-    I -->|Yes| L{Target Path Exists?}
-    L -->|No| M[Log Error: Target Path Missing]
-    M --> K
-    L -->|Yes| N[Load Data]
-    N --> O{Data Loaded Successfully?}
-    O -->|No| P[Log Error: Data Load Failed]
-    P --> K
-    O -->|Yes| Q[Perform Analysis]
-    Q --> R[Generate Summary Statistics]
-    R --> S[Generate Visualizations]
-    S --> T[Generate Report]
-    T --> U[Log: Analysis Completed Successfully]
-    U --> V[End]
+    A["Main"] --> B["Get Arguments"]
+    B --> C["Start Logging"]
+    C --> D["Load Configuration"]
+    D --> E["Load Data Frame"]
+    E --> F["Convert To Metrics Data Frame"]
+    F --> G["Calculate Summary Statistcs"]
+    G --> H["Generate Report File"]
+    H --> I["Generate Historgram"]
+    I --> J["Generate Scatterplot"]
+    J --> K["Generate Boxplot"]
+    K --> L["Generate Boxplot II"]
+    L --> M["Generate BoxenPlot"]
+    M --> N["Generate ViolinPlot"]
+    n1["High Level Flow"]
+Config_File[("`analysis.yml`")]-->D
+H-->Report_File[("`analysis_report.txt`")]
+I-->Historgram_File[("analysis_hist.png")] 
+J-->Scatter_File[("analysis_scatter.png")] 
+K-->box_File[("analysis_boxplot.png")] 
+L-->boxen_File[("analysis_boxenplot.png")] 
+M-->violin_File[("analysis_violinplot.png")] 
 ```
 
 ## Files
@@ -72,9 +112,10 @@ The iris dataset is a tiny dataset which is used for projects , this one include
 | class          | string  | Class of the iris flower (Iris-setosa, Iris-versicolor, Iris-virginica)     |
 ## References
 
-- Iris Dataset: https://archive.ics.uci.edu/dataset/53/iris
-- Iris Dataset: Fisher, R. (1936). Iris [Dataset]. UCI Machine Learning Repository. https://doi.org/10.24432/C56C76.
-- https://www.geeksforgeeks.org/multi-plot-grid-in-seaborn/   : Used to create the multi-plot grid
+- [Wikipedia: Iris Flower Data Set](https://en.wikipedia.org/wiki/Iris_flower_data_set)
+- [Irish Data Set]https://archive.ics.uci.edu/dataset/53/iris
+- [Iris Dataset: Fisher, R. (1936). Iris [Dataset]. UCI Machine Learning Repository. ]https://doi.org/10.24432/C56C76.
+- https://www.geeksforgeeks.org/multi-plot-grid-in-seaborn/
 - https://www.cuemath.com/geometry/area-of-an-ellipse/
 - datacamp.com : The data analytics course I am currently taking
 - https://www.statology.org/seaborn-table/ : Used to create the table to the side of a table

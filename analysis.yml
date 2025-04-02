@@ -1,10 +1,15 @@
+# This is a YAML file for the analysis of the Iris dataset.
+# It contains the configuration for the analysis, including the source and target paths,
+# the columns to be used, and the types of plots to be generated.
 source_columns:
 - sepal_length
 - sepal_width
 - petal_length
 - petal_width
 - species
+# The source file is the iris dataset in CSV format.
 source_csv_file: iris.data
+# The source path is the location of the iris dataset.
 source_path: c:\Users\cw171001\OneDrive - Teradata\Documents\Data_Analytics_2025_ATU\pands\pands-project
 target2_box: analysis_plot_box_II.png
 target2_boxen: analysis_plot_boxen_II.png
