@@ -34,44 +34,12 @@ flowchart TD
     N --> O{Data Loaded Successfully?}
     O -->|No| P[Log Error: Data Load Failed]
     P --> K
-    O -->|Yes| Q[Convert to Metrics DataFrame]
-    Q --> R{Metrics Conversion Successful?}
-    R -->|No| S[Log Error: Metrics Conversion Failed]
-    S --> K
-    R -->|Yes| T[Generate Summary Statistics]
-    T --> U{Summary Generated Successfully?}
-    U -->|No| V[Log Error: Summary Generation Failed]
-    V --> K
-    U -->|Yes| W[Generate Report]
-    W --> X{Report Generated Successfully?}
-    X -->|No| Y[Log Error: Report Generation Failed]
-    Y --> K
-    X -->|Yes| Z[Generate Histogram]
-    Z --> AA{Histogram Generated Successfully?}
-    AA -->|No| AB[Log Error: Histogram Generation Failed]
-    AB --> K
-    AA -->|Yes| AC[Generate Scatter Plot]
-    AC --> AD{Scatter Plot Generated Successfully?}
-    AD -->|No| AE[Log Error: Scatter Plot Generation Failed]
-    AE --> K
-    AD -->|Yes| AF[Generate Box Plot]
-    AF --> AG{Box Plot Generated Successfully?}
-    AG -->|No| AH[Log Error: Box Plot Generation Failed]
-    AH --> K
-    AG -->|Yes| AI[Generate Box Plot II]
-    AI --> AJ{Box Plot II Generated Successfully?}
-    AJ -->|No| AK[Log Error: Box Plot II Generation Failed]
-    AK --> K
-    AJ -->|Yes| AL[Generate Boxen Plot]
-    AL --> AM{Boxen Plot Generated Successfully?}
-    AM -->|No| AN[Log Error: Boxen Plot Generation Failed]
-    AN --> K
-    AM -->|Yes| AO[Generate Violin Plot]
-    AO --> AP{Violin Plot Generated Successfully?}
-    AP -->|No| AQ[Log Error: Violin Plot Generation Failed]
-    AQ --> K
-    AP --> AR[Log: Analysis Completed Successfully]
-    AR --> AS[End]
+    O -->|Yes| Q[Perform Analysis]
+    Q --> R[Generate Summary Statistics]
+    R --> S[Generate Visualizations]
+    S --> T[Generate Report]
+    T --> U[Log: Analysis Completed Successfully]
+    U --> V[End]
 ```
 
 ## Files
