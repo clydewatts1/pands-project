@@ -3,7 +3,30 @@ ATU Data Analytics Post Grad Diploma - Project
 
 ## Project Overview
 
-## File
+### Project : Iris Data Analysis
+### Author : Clyde Watts
+### Date : 2025-04-01
+### Course : ATU Post Grad Diploma in Data Analytics
+### Module : Principles of Data Analytics
+### Instructor : Andrew Beatty
+### Description : This project is an analysis of the iris dataset. The iris dataset is a tiny dataset which is used for projects , this one included. The iris dataset consists of 4 features ( properties) and 1 target . The 4 features are the petal length and width , and the sepal length and width ( no idea what a sepal is). The target is the iris flower type , setosa, versicolor or virginica. There is a sample of 50 of each flower species ( target). The features are all measured in cm , and the target is a varchar string of the species.
+
+
+## Flowchart
+
+```mermaid
+flowchart TD
+    A[Start] --> B[Import Libraries]
+    B --> C[Load Data]
+    C --> D[Explore Data]
+    D --> E[Visualize Data]
+    E --> F[Analyze Data]
+    F --> G[Fit Model]
+    G --> H[Evaluate Model]
+    H --> I[End]
+```
+
+## Files
 
 | Directory     | File Name             | Description                            | Notes                         |
 |--------------:|----------------------:|---------------------------------------:|-------------------------------|
@@ -19,7 +42,9 @@ ATU Data Analytics Post Grad Diploma - Project
 
 ### File : iris.data file format
 
-The iris dataset is a tiny dataset which is used for projects , such as this one . As well as classification , neural networks , machine learning (ML) projects and data analysis.
+The iris dataset is a tiny dataset which is used for projects , this one included. The iris dataset consists of 4 features ( properties) and 1 target . The 4 features are the petal length and width , and the sepal length and width ( no idea what a sepal is). The target is the iris flower type , setosa, versicolor or virginica. There is a sample of 50 of each flower species ( target). The features are all measured in cm , and the target is a varchar string of the species.
+
+
 
 
 | Attribute Name | Type    | Description                                                                 |
