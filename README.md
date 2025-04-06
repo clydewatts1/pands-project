@@ -94,7 +94,22 @@ M-->violin_File[("analysis_violinplot.png")]
 | .             | bezdekItis.data       | Iris Data - CSV                        | CSV - no bom , linux          |
 | .             | README.md             | This file                              |                               |
 | .             | analysis_report.txt   | Analysis Report                        |                               | 
-| .             | analysis.log          | Script Log file                        |                               |   
+| .             | analysis.log          | Script Log file                        |                               |
+| .             | analysis_plot_hist.png| Histogram of the Iris Data             |                               |   
+| .             | analysis_plot_scatter.png| Scatterplot of the Iris Data        |                               |
+| .             | analysis_plot_box.png | Boxplot of the Iris Data               |                               |
+| .             | analysis_plot_boxen.png| Boxenplot of the Iris Data            |                               |
+| .             | analysis_plot_violin.png| Violinplot of the Iris Data         |                               | 
+| .             | analysis_plot_box_II.png| Boxplot II of the Iris Data         |                               |
+| .             | analysis_plot_boxen_II.png| Boxenplot II of the Iris Data     |                               |
+| .             | analysis_plot_violin_II.png| Violinplot II of the Iris Data   |                               |
+| .             | analysis_plot_box_II.png| Boxplot II of the Iris Data         |                               |
+| .             | analysis_plot_histogram_petal_length.png| Histogram of the Petal Length |                               |
+| .             | analysis_plot_histogram_petal_width.png| Histogram of the Petal Width   |                               |
+| .             | analysis_plot_histogram_sepal_length.png| Histogram of the Sepal Length |                               |
+| .             | analysis_plot_histogram_sepal_width.png| Histogram of the Sepal Width   |                               |
+| .             | analysis_kmeans_cluster.ipynb| KMeans Clustering Notebook         |                               |
+| .             | analysis_dbscan_cluster.ipynb| DBSCAN Clustering Notebook           |                               |
 
 ### File : iris.data file format
 

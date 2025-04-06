@@ -1,3 +1,5 @@
+# If not explicitly specified on the command line then the internal program defaults are used.
+# This is to facilitate running on somebody else;s machine without having to change the code.
 # This is a YAML file for the analysis of the Iris dataset.
 # It contains the configuration for the analysis, including the source and target paths,
 # the columns to be used, and the types of plots to be generated.
@@ -11,11 +13,20 @@ source_columns:
 source_csv_file: iris.data
 # The source path is the location of the iris dataset.
 source_path: c:\Users\cw171001\OneDrive - Teradata\Documents\Data_Analytics_2025_ATU\pands\pands-project
+# File name for box plot II
 target2_box: analysis_plot_box_II.png
+# File name for boxen plot II
 target2_boxen: analysis_plot_boxen_II.png
+# File name for violin plot II
 target2_violin: analysis_plot_violin_II.png
+# File name for box plot  
 target_box: analysis_plot_box.png
+# File name for boxen plot
 target_histogram: analysis_plot_histograms.png
+# File name for target path
 target_path: c:\Users\cw171001\OneDrive - Teradata\Documents\Data_Analytics_2025_ATU\pands\pands-project
+# File name for report
 target_report: analysis_report.txt
+# File name for analysis scatter plot
 target_scatter: analysis_plot_scatter.png
+# The End

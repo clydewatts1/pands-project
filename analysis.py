@@ -5,9 +5,14 @@
 # Date: 2025-03-19
 # Version: v1.0
 #------------------------------------------------------------------------------
-# Requirements
-#------------------------------------------------------------------------------
-
+# Requirements:
+# 1. Research the data set online and write a summary about it in your README.
+# 2. Download the data set and add it to your repository.
+# 3. Write a program called analysis.py that:
+# 1. Outputs a summary of each variable to a single text file,
+# 2. Saves a histogram of each variable to png files, and
+# 3. Outputs a scatter plot of each pair of variables.
+# 4. Performs any other analysis you think is appropriate.
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -16,7 +21,10 @@ import logging
 import os
 import argparse
 import yaml
-
+#-------------------------------------------------------------------------------
+# Global Variables
+#-------------------------------------------------------------------------------
+# Logging file name
 log_file = "analysis.log"
 # configuration dictionary
 config = {
@@ -24,14 +32,18 @@ config = {
     # get file name of this script , makes it easier to run from vscode or jupyter noteboo
     "source_path": os.path.dirname(os.path.abspath(__file__)).replace("\\","/"),
     "source_columns": ["sepal_length", "sepal_width", "petal_length", "petal_width", "species"],
+    "feature_columns": ["sepal_length", "sepal_width", "petal_length", "petal_width"],
+    "target_columns": ["species"],
     "target_path": os.path.dirname(os.path.abspath(__file__)).replace("\\","/"),
     "target_report": "analysis_report.txt",
-    "target_histogram": "analysis_plot_histograms.png",
+    "target_histogram_feature": "analysis_plot_histogram_feature.png",
+    "target_histogram_combined": "analysis_plot_histograms_combined.png",
     "target_scatter": "analysis_plot_scatter.png",
     "target_box": "analysis_plot_box.png",
     "target2_box": "analysis_plot_box_II.png",
     "target2_violin": "analysis_plot_violin_II.png",
     "target2_boxen": "analysis_plot_boxen_II.png"
+
 }
 #------------------------------------------------------------------------------
 # Function: write_config_to_file
@@ -109,7 +121,7 @@ def load_data(config):
     Raises:
         Exception: If there is an error parsing the file.
     """
-    logging.info("Loading data from dir %s file%s", config['source_path'],config["source_csv_file"])
+    logging.info("Loading data from dir <%s> file <%s>", config['source_path'],config["source_csv_file"])
     # Load data from a CSV file into a pandas DataFrame
 
     # return_code: 0 = success, 1 = failure
@@ -118,7 +130,9 @@ def load_data(config):
         logging.error("source_csv_file not in config")
         return 1, None
     # Check if the file exists
-    file_path = config["source_csv_file"]
+    # combine the source path and file name
+    # to get the full path to the file
+    file_path = os.path.join(config["source_path"], config["source_csv_file"])
     logging.info("Loading data from %s", file_path)
     return_code = 0
     # Check if file loaded correctl
@@ -313,17 +327,68 @@ def generate_report(config,to_console = False):
             print(f.read())
     logging.info("Report generated successfully")
     return 0
+
 #------------------------------------------------------------------------------
-# Function: generate_histogram
+# Function: generate_histogram_by_feature
+# Description: Generate a histogram file per specie
+# Generate 3 files ,one per species
+#------------------------------------------------------------------------------
+def generate_histogram_by_feature(config,to_console = False):
+    logging.info("Generating histogram by species")
+    if 'df' not in config:
+        logging.error("DataFrame not in config")
+        return -1
+    # check if histogram file is specified in the config
+    if "target_histogram_feature" not in config:
+        logging.error("target_histogram_feature not in config")
+        return -1
+    # check if feature_columns is specified in the config
+    if "feature_columns" not in config:
+        logging.error("feature_columns not in config")
+        return -1
+    # loop through each feature and save to file a histogram of the data
+    for feature in config["feature_columns"]:
+        # get the target histogram file name
+        file_name = config["target_histogram_feature"]
+        # replace feature with the feature name
+        file_name = file_name.replace("feature", feature)
+        # now combine the source path and file name
+        # to get the full path to the file
+        file_path = os.path.join(config["source_path"], file_name)
+        logging.info("Loading data from %s", file_path)
+        # check if file exists and then remove it
+        if os.path.exists(file_path):
+            # remove the file
+            os.remove(file_path)
+        # create a histogram of the data
+        fig , ax = plt.subplots(figsize=(10, 6))
+        fig.suptitle(f'Iris Dataset Histogram Feature :  {feature.replace("_", " ").title()}', fontsize=16)
+        df = config['df']
+        sns.set_palette("pastel")
+        sns.histplot(df, x=feature, hue='species', ax=ax, alpha=0.2, bins=20, kde=True)
+        # set the x and y axis labels
+        feature_label = f"{feature.replace("_", " ").title()} in cm"
+        ax.set_xlabel(feature_label)
+        ax.set_ylabel('Frequency')
+        # save the histogram to a file
+        logging.info("Saving histogram to %s", file_path)
+        plt.savefig(file_path)
+        plt.close()
+
+    logging.info("Histogram generated successfully")
+    return 0
+#------------------------------------------------------------------------------
+# Function: generate_histograms_combined
 # Description: Generate a histogram of the data
+#            : This will generate a combined histogram of the data
 #------------------------------------------------------------------------------
-def generate_histogram(config,to_console = False):
+def generate_histograms_combined(config,to_console = False):
     """
     Generate a histogram of the Iris dataset.
     Parameters:
     config (dict): Configuration dictionary containing the following keys:
         - 'df' (pandas.DataFrame): DataFrame containing the Iris dataset.
-        - 'target_histogram' (str): File path where the histogram will be saved.
+        - 'target_histogram_combined' (str): File path where the histogram will be saved.
     to_console (bool, optional): If True, display the histogram in the console. Default is False.
     Returns:
     int: Returns 0 if the histogram is generated successfully, -1 if the DataFrame is not found in the config.
@@ -334,33 +399,38 @@ def generate_histogram(config,to_console = False):
     - The histograms are colored by species and include a kernel density estimate (KDE).
     - If the target histogram file already exists, it will be removed before saving the new histogram.
     """
-    logging.info("Generating histogram")
+    logging.info("Generating histogram combined")
     # Generate a histogram of the data
     # check if the dataframe is empty
     if 'df' not in config:
         logging.error("DataFrame not in config")
         return -1
     # check if the histogram file exists
-    if os.path.exists(config["target_histogram"]):
+    if os.path.exists(config["target_histogram_combined"]):
         # remove the file
-        os.remove(config["target_histogram"])
+        os.remove(config["target_histogram_combined"])
     # create a subplot with 2 rows and 2 columns to hold the historgrams
     fig,ax = plt.subplots(2, 2, figsize=(10, 8))
     fig.suptitle('Iris Dataset Histograms', fontsize=16)
     df = config['df']
     sns.set_palette("pastel")
-    sns.histplot(df, x='sepal_length', hue='species', ax=ax[0, 0], alpha=0.2, bins=20, kde=True)
-    sns.histplot(df, x='sepal_width', hue='species', ax=ax[0, 1], alpha=0.2, bins=20, kde=True)
-    sns.histplot(df, x='petal_length', hue='species', ax=ax[1, 0], alpha=0.2, bins=20, kde=True)
-    sns.histplot(df, x='petal_width', hue='species',  ax=ax[1, 1], alpha=0.2, bins=20, kde=True)
-
+    # flatten the axes array to make it easier to loop through
+    ax_flatten = ax.flatten()
+    # loop through each feature and save to file a histogram of the data
+    # use same trick as above to get the feature name
+    for i, feature in enumerate(config["feature_columns"]):
+        # create a histogram of the data
+        sns.histplot(df, x=feature, hue='species', ax=ax_flatten[i], alpha=0.2, bins=20, kde=True)
+        # set the x and y axis labels
+        feature_label = f"{feature.replace('_', ' ').title()} in cm"
+        ax_flatten[i].set_xlabel(feature_label)
+        ax_flatten[i].set_ylabel('Frequency')
     plt.tight_layout()
     if to_console:
         # print the histogram to the console
         plt.show()
     # save the histogram to a file
-    filename = f"{config['target_path']}/{config['target_histogram']}"
-    logging.info("Saving histogram to ",filename)
+    filename = f"{config['target_path']}/{config['target_histogram_combined']}"
     plt.savefig(filename)
     plt.close()
     logging.info("Histogram generated successfully")
@@ -415,9 +485,7 @@ def generate_scatter_plot(config,to_console = False):
         # print the scatter plot to the console
         plt.show()
     # save the scatter plot to a file
-
-    logging.info("Saving scatter plot to ",filename)
-    plt.savefig(config["target_scatter"])
+    plt.savefig(filename)
     plt.close()
     logging.info("Scatter plot generated successfully")
     return 0
@@ -554,12 +622,14 @@ def generate_box_plot_II(config, to_console = False, kind = "box"):
 # Description: Main function to run the analysis
 #------------------------------------------------------------------------------
 def main():
+    # define the default config dictionary from global variable
+    global config
 
     # Set up argument parser
     parser = argparse.ArgumentParser(description="Iris Dataset Analysis")
     # Add argument for configuration file
     # TODO: Add yaml config fil
-    parser.add_argument("--config", type=str, help="Path to the configuration file", default="config.yaml")
+    parser.add_argument("--config", type=str, help="Path to the configuration file")
     # Add argument for logging level
     parser.add_argument("--log_level", type=str, help="Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)", default="INFO")
     # Add write config to file option once off so I can capture the config file
@@ -594,6 +664,9 @@ def main():
         with open(args.config, 'r') as file:
             config = yaml.safe_load(file)
             logging.info("Config loaded from file")
+    else:
+        logging.info("No config file provided, using default config")
+        logging.info("Config: %s", config)
 
     # check if config source path exists
     if not os.path.exists(config["source_path"]):
@@ -639,9 +712,17 @@ def main():
         logging.error("Failed to generate report")
         return
     
-    # Generate the histogram
-    logging.info("Generating histogram")
-    return_code = generate_histogram(config)
+    # Generate the histogram by species
+    logging.info("Generating histogram by species")
+    return_code = generate_histogram_by_feature(config)
+    # If there is a error generating the histogram, log it and return
+    if return_code == -1:
+        logging.error("Failed to generate histogram by species")
+        return
+    
+    # Generate the histogram combined
+    logging.info("Generating histogram combined")
+    return_code = generate_histograms_combined(config)
     # If there is a error generating the histogram, log it and return
     if return_code == -1:
         logging.error("Failed to generate histogram")
@@ -687,6 +768,11 @@ def main():
         logging.error("Failed to generate violin plot")
         return
     logging.info("Analysis completed successfully")
-    
+#------------------------------------------------------------------------------
+# -- MAIN --
+#------------------------------------------------------------------------------    
 if __name__ == "__main__":
     main()
+#------------------------------------------------------------------------------
+# END 
+#------------------------------------------------------------------------------
