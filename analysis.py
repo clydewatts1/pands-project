@@ -471,15 +471,14 @@ def generate_scatter_plot(config,to_console = False):
         os.remove(filename)
     sns.set_palette("pastel")
     # create a subplot with 2 rows and 2 columns to hold the historgrams
-    fig,ax = plt.subplots(2, 2, figsize=(10, 8))
+    fig,ax = plt.subplots(1, 2, figsize=(10, 5))
     fig.suptitle('Iris Dataset Scatter Plot', fontsize=16)
-    df = config['df']
     # First row is sepal length and width and petal length and width
     # Second row is sepal length and petal length and sepal width and petal width
-    sns.scatterplot(data=config['df'], x='sepal_length', y='sepal_width', hue='species', ax=ax[0, 0])
-    sns.scatterplot(data=config['df'], x='petal_length', y='petal_width', hue='species', ax=ax[0, 1])
-    sns.scatterplot(data=config['df'], x='sepal_length', y='petal_length', hue='species', ax=ax[1, 0])
-    sns.scatterplot(data=config['df'], x='sepal_width', y='petal_width', hue='species', ax=ax[1, 1])
+    sns.scatterplot(data=config['df'], x='sepal_length', y='sepal_width', hue='species', ax=ax[0])
+    ax[0].set(xlabel='Sepal Length in cm', ylabel='Sepal Width in cm')
+    sns.scatterplot(data=config['df'], x='petal_length', y='petal_width', hue='species', ax=ax[1])
+    ax[1].set(xlabel='Petal Length in cm', ylabel='Petal Width in cm')
     plt.tight_layout()
     if to_console:
         # print the scatter plot to the console
@@ -531,10 +530,14 @@ def generate_box_plot(config,to_console = False):
     # TODO : get the x-axis to be the same for all plots
 
     # https://stackoverflow.com/questions/19509870/how-to-set-x-axis-labels-in-seaborn-boxplot
-    sns.boxplot(data=config['df'], x='species', y='sepal_length', ax=ax[0, 0],hue='species', palette="pastel").set(xlabel="Species", ylabel="Sepal Length")
-    sns.boxplot(data=config['df'], x='species', y='sepal_width', ax=ax[0, 1], hue='species', palette="pastel").set(xlabel="Species", ylabel="Sepal Width")
-    sns.boxplot(data=config['df'], x='species', y='petal_length', ax=ax[1, 0], hue='species', palette="pastel").set(xlabel="Species", ylabel="Petal Length")
-    sns.boxplot(data=config['df'], x='species', y='petal_width', ax=ax[1, 1], hue='species', palette="pastel").set(xlabel="Species", ylabel="Petal Width")
+    sns.boxplot(data=config['df'], x='species', y='sepal_length', ax=ax[0, 0],hue='species', palette="pastel")
+    ax[0,0].set(xlabel="Species", ylabel="Sepal Length in cm")
+    sns.boxplot(data=config['df'], x='species', y='sepal_width', ax=ax[0, 1], hue='species', palette="pastel")
+    ax[0,1].set(xlabel="Species", ylabel="Sepal Width in cm")
+    sns.boxplot(data=config['df'], x='species', y='petal_length', ax=ax[1, 0], hue='species', palette="pastel")
+    ax[1,0].set(xlabel="Species", ylabel="Petal Length in cm")
+    sns.boxplot(data=config['df'], x='species', y='petal_width', ax=ax[1, 1], hue='species', palette="pastel")
+    ax[1,1].set(xlabel="Species", ylabel="Petal Width in cm")
     plt.tight_layout()
     if to_console:
         # print the box plot to the console
@@ -608,7 +611,9 @@ def generate_box_plot_II(config, to_console = False, kind = "box"):
         title = title.title()
         # set the title of each subplot 
         ax.set_title(title)
-    plt.suptitle(f"{kind.capitalize()} Plot of features by species")
+        # set the x and y axis labels
+        ax.set(xlabel="Species", ylabel="Value in cm")
+    plt.suptitle(f"{kind.capitalize()} Plot of features by species with common x-axis", fontsize=16)
     if to_console:
         # print the box plot to the console
         plt.show()  
