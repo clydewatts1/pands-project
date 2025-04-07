@@ -125,6 +125,36 @@ The iris dataset is a tiny dataset which is used for projects , this one include
 | petal_length   | float   | Length of the petal in centimeters                                          |
 | petal_width    | float   | Width of the petal in centimeters                                           |
 | class          | string  | Class of the iris flower (Iris-setosa, Iris-versicolor, Iris-virginica)     |
+
+### File : parameters.yaml file format
+The parameters.yaml file is a configuration file that contains the parameters used in the analysis. The parameters are used to set the paths for the input and output files, as well as the columns to be used in the analysis.
+
+```yaml
+feature_columns:
+- sepal_length
+- sepal_width
+- petal_length
+- petal_width
+source_columns:
+- sepal_length
+- sepal_width
+- petal_length
+- petal_width
+- species
+source_csv_file: iris.data
+source_path: c:/Users/cw171001/OneDrive - Teradata/Documents/Data_Analytics_2025_ATU/pands/pands-project
+target2_box: analysis_plot_box_II.png
+target2_boxen: analysis_plot_boxen_II.png
+target2_violin: analysis_plot_violin_II.png
+target_box: analysis_plot_box.png
+target_columns:
+- species
+target_histogram_combined: analysis_plot_histograms_combined.png
+target_histogram_feature: analysis_plot_histogram_feature.png
+target_path: c:/Users/cw171001/OneDrive - Teradata/Documents/Data_Analytics_2025_ATU/pands/pands-project
+target_report: analysis_report.txt
+target_scatter: analysis_plot_scatter.png
+'''
 ## References
 
 - [Wikipedia: Iris Flower Data Set](https://en.wikipedia.org/wiki/Iris_flower_data_set)
