@@ -200,6 +200,8 @@ def convert_to_metrics_df(config):
     # var_name is the new column name for the features
     # value_name is the new column name for the values
     logging.info("Converting DataFrame to metrics DataFrame")
+    # Melt is like a un-pivot operation
+    # it takes the columns and turns them into rows
     df_iris_melt = config['df'].melt(id_vars='species', var_name='feature', value_name='value')
     config["df_iris_melt"] = df_iris_melt
     logging.info("Melt DataFrame shape: %s", config["df_iris_melt"].shape)
@@ -238,6 +240,7 @@ def load_summary(config):
         - Logs an error if the resulting summary DataFrame is empty.
         - Logs the shape, columns, and head of the summary DataFrame upon successful creation.
     """
+    # local functions to calculate 25th and 75th quantiles
     def quantile_25(x):
         return np.quantile(x, 0.25)
 
@@ -245,29 +248,24 @@ def load_summary(config):
         return np.quantile(x, 0.75)
     logging.info("Generating summary DataFrame")
     # Get dataframe from config
-    if 'df' not in config:
+    if 'df_iris_melt' not in config:
         logging.error("DataFrame not in config")
         return -1
-    # Get the dataframe from the config
-
-    df = config['df_iris_melt'].groupby(['species', 'feature'])['value'].agg(['mean', 'min', 'max', 'std', 'median',quantile_25 , quantile_75]).reset_index()
     # Group by target and get the mean, min, max, std, median, 25th and 75th quantile
-
-    df = df.rename(columns={'mean': 'Mean', 'min': 'Min', 'max': 'Max', 'std': 'Std', 'median': 'Median', 'quantile_25': 'Q25', 'quantile_75': 'Q75'})
-    # Create a new column with the feature name
-    # round the values to 2 decimal places
-    df['Mean'] = df['Mean'].round(2)
-    df['Min'] = df['Min'].round(2)
-    df['Max'] = df['Max'].round(2)
-    df['Std'] = df['Std'].round(2)
-    df['Median'] = df['Median'].round(2)
-    df['Q25'] = df['Q25'].round(2)
-    df['Q75'] = df['Q75'].round(2)
-    # check if the dataframe is empty
-    if df.empty:
-        logging.error("DataFrame is empty")
-        return 1
-    config['df_summary'] = df
+    df_tmp = config['df_iris_melt'].groupby(['species', 'feature'])['value'].agg(['mean', 'min', 'max', 'std', 'median',quantile_25 , quantile_75]).reset_index()
+    # Rename columns to something more user friendly
+    df_tmp = df_tmp.rename(columns={'mean': 'Mean', 'min': 'Min', 'max': 'Max', 'std': 'Std', 'median': 'Median', 'quantile_25': 'Q25', 'quantile_75': 'Q75'})
+    # round the values to 2 decimal places - it is easier to read 
+    # could do this on the display side , which may be better
+    # but for now we will do it here
+    df_tmp['Mean'] = df_tmp['Mean'].round(2)
+    df_tmp['Min'] = df_tmp['Min'].round(2)
+    df_tmp['Max'] = df_tmp['Max'].round(2)
+    df_tmp['Std'] = df_tmp['Std'].round(2)
+    df_tmp['Median'] = df_tmp['Median'].round(2)
+    df_tmp['Q25'] = df_tmp['Q25'].round(2)
+    df_tmp['Q75'] = df_tmp['Q75'].round(2)
+    config['df_summary'] = df_tmp
     logging.info("Summary DataFrame shape: %s", config["df_summary"].shape)
     logging.info("Summary DataFrame columns: %s", config["df_summary"].columns)
     logging.info("Summary DataFrame head: %s", config["df_summary"].head())
@@ -304,27 +302,37 @@ def generate_report(config,to_console = False):
     if 'df' not in config:
         logging.error("DataFrame not in config")
         return -1
-    with open(report_file, "w") as f:
-        # write the header
-        f.write("Analysis Report\n")
-        f.write("===============\n")
-        # write the dataframe to the file
-        f.write("DataFrame\n")
-        f.write("=========\n")
-        f.write(f"DataFrame Shape: {config['df'].shape}\n")
-        f.write(f"DataFrame Info: {config['df'].info}\n")
-        f.write(f"DataFrame Columns: {config['df'].columns}\n")
-        f.write(f"DataFrame Head: {config['df'].head()}\n")
-        f.write("\n")
-        # write the summary statistics to the file
-        f.write("Summary Statistics\n")
-        f.write("==================\n")
-        f.write(config["df"].describe().to_string())
-    # Print out file - use in jupyter notebook
+    # although the file is checked for existence above
+    # there may be other errors that happen when either opening or writing to the file
+    try:
+        with open(report_file, "w") as f:
+            # write the header
+            f.write("Analysis Report\n")
+            f.write("===============\n")
+            # write the dataframe to the file
+            f.write("DataFrame\n")
+            f.write("=========\n")
+            f.write(f"DataFrame Shape: {config['df'].shape}\n")
+            f.write(f"DataFrame Info: {config['df'].info}\n")
+            f.write(f"DataFrame Columns: {config['df'].columns}\n")
+            f.write(f"DataFrame Head: {config['df'].head()}\n")
+            f.write("\n")
+            # write the summary statistics to the file
+            f.write("Summary Statistics\n")
+            f.write("==================\n")
+            f.write(config["df"].describe().to_string())
+        # Print out file - use in jupyter notebook
+    except OSError as e:
+        logging.error("Error removing file %s: %s", report_file, e)
+        return -1
     if to_console:
         # print the report to the console
-        with open(report_file, "r") as f:
-            print(f.read())
+        try:
+            with open(report_file, "r") as f:
+                print(f.read())
+        except OSError as e:
+            logging.error("Error reading file %s: %s", report_file, e)
+            return -1
     logging.info("Report generated successfully")
     return 0
 
@@ -364,9 +372,11 @@ def generate_histogram_by_feature(config,to_console = False):
         fig , ax = plt.subplots(figsize=(10, 6))
         fig.suptitle(f'Iris Dataset Histogram Feature :  {feature.replace("_", " ").title()}', fontsize=16)
         df = config['df']
+        # Use seaborn to plot histogram
         sns.set_palette("pastel")
         sns.histplot(df, x=feature, hue='species', ax=ax, alpha=0.2, bins=20, kde=True)
         # set the x and y axis labels
+        # change the namge of the feature to be more fancy
         feature_label = f"{feature.replace("_", " ").title()} in cm"
         ax.set_xlabel(feature_label)
         ax.set_ylabel('Frequency')
