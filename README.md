@@ -11,7 +11,22 @@ ATU Data Analytics Post Grad Diploma - Project
 ### Instructor : Andrew Beatty
 
 
+## Requirements
+
+1. Research the data set online and write a summary about it in your README.
+2. Download the data set and add it to your repository.
+3. Write a program called analysis.py that:
+    1. Outputs a summary of each variable to a single text file,
+    2. Saves a histogram of each variable to png files, and
+    3. Outputs a scatter plot of each pair of variables.
+    4. Performs any other analysis you think is appropriate.
+
+
+
 ## Command Line Arguments
+
+The script can be run as is from the command line or vscode without any arguments. The script will use the default configuration file and log level. 
+
 The script takes the following command line arguments:
 
 ```bash
@@ -20,16 +35,16 @@ python analysis.py --config <config_file> --log_level <log_level> --write_config
 ```
 | Argument        | Description                                                                 |
 |-----------------|-----------------------------------------------------------------------------|
-| --config        | Path to the configuration file (YAML format)                               |
-| --log_level     | Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)                      |
-| --write_config  | Write the configuration to a file (YAML format)                            |
-|-----------------|-----------------------------------------------------------------------------|
+| --config        | OPTIONAL : Path to the configuration file (YAML format)                               |
+| --log_level     | OPTIONAL : Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)                      |
+| --write_config  | OPTIONAL : Write the configuration to a file (YAML format)                            |
+
 
 
 ## Configuration File
 The configuration file is in YAML format and contains the following sections:
 
-'''yaml
+```yaml
 
 source_columns:
 - sepal_length
@@ -154,7 +169,9 @@ target_histogram_feature: analysis_plot_histogram_feature.png
 target_path: c:/Users/cw171001/OneDrive - Teradata/Documents/Data_Analytics_2025_ATU/pands/pands-project
 target_report: analysis_report.txt
 target_scatter: analysis_plot_scatter.png
-'''
+```
+
+
 ## References
 
 - [Wikipedia: Iris Flower Data Set](https://en.wikipedia.org/wiki/Iris_flower_data_set)
